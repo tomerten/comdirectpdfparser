@@ -14,9 +14,16 @@ keywords = ['packaging', 'poetry']
 
 [tool.poetry.dependencies]
 python = "^3.7"
+lark = "^0.11.3"
+tika = "^1.24"
+numpy = "^1.21.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^4.4.2"
+black = "^21.6b0"
+isort = "^5.9.1"
+pylint = "^2.9.3"
+mypy = "^0.910"
 
 [tool.poetry.scripts]
 

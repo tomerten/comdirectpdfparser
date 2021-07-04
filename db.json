@@ -1,0 +1,107 @@
+{
+  "utils": {
+    "options": {
+      "verbosity": 1,
+      "project_path": "/Users/tommertens/github-repos/comdirectpdfparser",
+      "default_project_path": true,
+      "clear_log": false,
+      "template_parameters": {
+        "project_name": "comdirectpdfparser",
+        "package_name": "comdirectpdfparser",
+        "full_name": "first-name last-name",
+        "email": "your.email@whatev.er",
+        "github_username": "your-github-username",
+        "version": "0.0.0",
+        "github_repo": "{{ cookiecutter.project_name }}",
+        "default_branch": "master",
+        "python_version": "3.7",
+        "sphinx_html_theme": "sphinx_rtd_theme",
+        "open_source_license": "MIT license",
+        "py": "py",
+        "project_short_description": "<Enter a one-sentence description of this project here.>",
+        "module_name": "utils"
+      },
+      "add_name": "utils",
+      "app": false,
+      "group": false,
+      "py": true,
+      "package": false,
+      "f90": false,
+      "cpp": false,
+      "templates": "module-py",
+      "overwrite": false,
+      "backup": false
+    },
+    "API.rst": "\n.. automodule:: comdirectpdfparser.utils\n   :members:\n\n"
+  },
+  "jlog": {
+    "options": {
+      "verbosity": 1,
+      "project_path": "/Users/tommertens/github-repos/comdirectpdfparser",
+      "default_project_path": true,
+      "clear_log": false,
+      "template_parameters": {
+        "project_name": "comdirectpdfparser",
+        "package_name": "comdirectpdfparser",
+        "full_name": "first-name last-name",
+        "email": "your.email@whatev.er",
+        "github_username": "your-github-username",
+        "version": "0.0.0",
+        "github_repo": "{{ cookiecutter.project_name }}",
+        "default_branch": "master",
+        "python_version": "3.7",
+        "sphinx_html_theme": "sphinx_rtd_theme",
+        "open_source_license": "MIT license",
+        "py": "py",
+        "project_short_description": "<Enter a one-sentence description of this project here.>",
+        "module_name": "jlog"
+      },
+      "add_name": "jlog",
+      "app": false,
+      "group": false,
+      "py": true,
+      "package": false,
+      "f90": false,
+      "cpp": false,
+      "templates": "module-py",
+      "overwrite": false,
+      "backup": false
+    },
+    "API.rst": "\n.. automodule:: comdirectpdfparser.jlog\n   :members:\n\n"
+  },
+  "log": {
+    "options": {
+      "verbosity": 1,
+      "project_path": "/Users/tommertens/github-repos/comdirectpdfparser",
+      "default_project_path": true,
+      "clear_log": false,
+      "template_parameters": {
+        "project_name": "comdirectpdfparser",
+        "package_name": "comdirectpdfparser",
+        "full_name": "first-name last-name",
+        "email": "your.email@whatev.er",
+        "github_username": "your-github-username",
+        "version": "0.0.0",
+        "github_repo": "{{ cookiecutter.project_name }}",
+        "default_branch": "master",
+        "python_version": "3.7",
+        "sphinx_html_theme": "sphinx_rtd_theme",
+        "open_source_license": "MIT license",
+        "py": "py",
+        "project_short_description": "<Enter a one-sentence description of this project here.>",
+        "module_name": "log"
+      },
+      "add_name": "log",
+      "app": false,
+      "group": false,
+      "py": true,
+      "package": false,
+      "f90": false,
+      "cpp": false,
+      "templates": "module-py",
+      "overwrite": false,
+      "backup": false
+    },
+    "API.rst": "\n.. automodule:: comdirectpdfparser.log\n   :members:\n\n"
+  }
+}
