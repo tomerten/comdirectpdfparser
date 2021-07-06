@@ -84,7 +84,7 @@ class ComDirectParser:
         for _file in self.filelist:
             log.info(_file)
             # return dict
-            parsed = {}
+            parsed = {'filename': _file.split("/")[-1]}
 
             # load pdf data
             raw = readRaw(_file)
@@ -221,10 +221,11 @@ class ComDirectParser:
         # source tax
         sourcetax = re.findall(rf"(\d+(?:\.\d+)?,\d+) % Quellensteuer\s+{self.CUR}\s+{regexdecimal}", rawText)
         tax_percentage, tax_curr, tax = sourcetax[0]
-
+        
         tax_percentage = stringToNumber(tax_percentage)
         tax = stringToNumber(tax)
 
+        log.warning(tax)
         # if dividend currency is not equal to account currency
         if divCurr != accountCurr:
             forexrate = stringToNumber(
@@ -236,12 +237,11 @@ class ComDirectParser:
         div = np.round(divperstock / forexrate, 2)
         brutto = np.round(brutto / forexrate, 2)
         tax = np.round(tax / forexrate,2)
-        cost = np.round(brutto - tax, 2)
+        cost = np.round(brutto - totalCost, 2)
 
         _costKeys = ["Dividend (per share)", "Brutto", "Fees"]
         _costValues = [div, brutto, cost]
 
-        log.info(_costValues)
         divparsed = {**divparsed, **dict(zip(_costKeys, _costValues))}
 
         # get reference number to match with Tax document
@@ -432,7 +432,7 @@ class ComDirectParser:
         # get reference number to match with Tax document
         refnr = re.findall(rf"Referenz\S+\s+(\S+)", rawText)[0]
         values = re.findall(
-            rf"\nZu Ihren Gunsten\s+\S+\s+\S+\s+{self.CUR}\s* ([0-9]*[.]*[0-9]*[,][0-9]*)", rawText
+            rf"\nZu Ihren \w+\s+\S+\s+\S+\s+{self.CUR}\s* ([-]?[0-9]*[.]*[0-9]*[,][0-9]*)", rawText
         )
         tax_currency = values[0][0]
 
