@@ -13,6 +13,7 @@ import os
 import re
 
 import numpy as np
+import pandas as pd
 from pymongo import ASCENDING, MongoClient
 from pymongo.errors import BulkWriteError
 from tqdm import tqdm
