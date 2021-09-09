@@ -18,6 +18,10 @@ lark = "^0.11.3"
 tika = "^1.24"
 numpy = "^1.21.0"
 pandas = "^1.3.0"
+matplotlib = "^3.4.2"
+pymongo = "^3.11.4"
+tqdm = "^4.61.2"
+ipykernel = "^6.0.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "^4.4.2"

@@ -9,14 +9,20 @@ Top-level package for comdirectpdfparser.
 
 __version__ = "0.0.0"
 
-from .utils import readRaw, stringToNumber
 import os
 import re
-from . import log
+
 import numpy as np
+from pymongo import ASCENDING, MongoClient
+from pymongo.errors import BulkWriteError
+from tqdm import tqdm
+
+from . import log
+from .utils import readRaw, stringToNumber
 
 regexdecimal = "(\d+(?:\.\d+)?,\d+)"
-    
+
+
 class ComDirectParser:
     """
     Class to parse comdirect pdf files.
@@ -25,6 +31,7 @@ class ComDirectParser:
         - dividendgutschrift
         - kauf/verkauf wertpapier
         - steuermitteilung dividends
+        - finanzreport
     """
 
     # CONSTANTS
@@ -38,14 +45,15 @@ class ComDirectParser:
 
     # docutypes that can be parsed
     docuDict = {
-        "Ertragsgutschrift" : "divertrags",
+        "Ertragsgutschrift": "divertrags",
         "Dividendengutschrift": "div",
         "Wertpapierkauf": "buy",
         "Wertpapierverkauf": "sell",
         "Steuerliche Behandlung": "tax",
+        "Finanzreport": "finanzreport",
     }
 
-    def __init__(self, inputlist: list) -> None:
+    def __init__(self, inputlist: list, client: MongoClient) -> None:
         # log.setup()
         self.folders = []
         self.files = []
@@ -53,6 +61,9 @@ class ComDirectParser:
         self.divparsed = []
         self.buysellparsed = []
         self.taxparsed = []
+        self.saldos = []
+        self.girotransactions = []
+        self.client = client
         # if inputlist is single file make a list out of it
         if isinstance(inputlist, list):
             pass
@@ -77,14 +88,14 @@ class ComDirectParser:
 
     def parse(self):
         """
-            General parser that will go through all given
-            files (also in given folders) and try to parse them.
-            
-            """
-        for _file in self.filelist:
-            log.info(_file)
+        General parser that will go through all given
+        files (also in given folders) and try to parse them.
+
+        """
+        for _file in tqdm(self.filelist):
+            # log.info(_file)
             # return dict
-            parsed = {'filename': _file.split("/")[-1]}
+            parsed = {"filename": _file.split("/")[-1]}
 
             # load pdf data
             raw = readRaw(_file)
@@ -92,8 +103,7 @@ class ComDirectParser:
 
             docutypere = "(" + ("|").join(self.docuDict.keys()) + ")"
             docutype = re.findall(f"{docutypere}", rawText)
-            log.info(docutype[0])
-
+            # log.info(docutype[0])
 
             if docutype:
                 _doctype = self.docuDict[docutype[0]]
@@ -101,17 +111,18 @@ class ComDirectParser:
             else:
                 print(_file)
                 continue
-            log.info(parsed)
+            # log.info(parsed)
 
-            accountDict = self.parse_account(rawText, _doctype)
-            parsed = {**parsed, **accountDict}
-            log.info(parsed)
+            if docutype not in ["finanzreport"]:
+                accountDict = self.parse_account(rawText, _doctype)
+                parsed = {**parsed, **accountDict}
+            # log.info(parsed)
 
             if _doctype == "div":
                 parsed = {**parsed, **self.parse_div(rawText, accountDict)}
                 self.divparsed.append(parsed)
 
-            elif _doctype == 'divertrags':
+            elif _doctype == "divertrags":
                 parsed = {**parsed, **self.parse_divertrags(rawText, accountDict)}
                 self.divparsed.append(parsed)
 
@@ -123,15 +134,32 @@ class ComDirectParser:
                 parsed = {**parsed, **self.parse_buysell(rawText, _doctype)}
                 self.buysellparsed.append(parsed)
 
-        return self.divparsed, self.buysellparsed, self.taxparsed
+            elif _doctype == "finanzreport":
+                parsed = {**parsed, **self.parse_finanzreport(rawText)}
+                saldos = parsed["saldos"].to_dict(orient="records")
+                transactions = parsed["giroTransactions"].to_dict(orient="records")
+
+                for s in saldos:
+                    self.saldos.append(s)
+
+                for t in transactions:
+                    self.girotransactions.append(t)
+
+        return (
+            self.divparsed,
+            self.buysellparsed,
+            self.taxparsed,
+            self.saldos,
+            self.girotransactions,
+        )
 
     def parse_account(self, rawText, _doctype):
         """
         Extract account and account currency data,
         date of transaction and total amount.
-        
+
         Total amount is stored with different key for
-        kauf/verkauf or div as they have a different 
+        kauf/verkauf or div as they have a different
         meaning.
         """
         acc = {}
@@ -152,13 +180,13 @@ class ComDirectParser:
                     "Netto curr",
                     "Net Before Tax",
                 ]
-            elif _doctype == 'divertrags':
+            elif _doctype == "divertrags":
                 _accountDateCostKeys = [
-                   "Account",
+                    "Account",
                     "Account curr",
                     "Date",
                     "Netto curr",
-                    "Net Before Tax", 
+                    "Net Before Tax",
                 ]
             else:
                 _accountDateCostKeys = [
@@ -202,12 +230,13 @@ class ComDirectParser:
 
             shares = stringToNumber(shares)
             _wknNameIsinValues = [wkn, stockname, shares, isin]
-            
+
             divparsed = {**divparsed, **dict(zip(_wknNameIsinKeys, _wknNameIsinValues))}
-        
+
         # get dividend per stock and dividend currency
         dividendperstockAndCurr = re.findall(
-            rf"{self.CUR}\s*(\d+(?:\.\d+)?,\d+).*Stück", rawText
+            rf"{self.CUR}\s*(\d+(?:\.\d+)?,\d+).*Stück",
+            rawText
             # rf"{self.CUR}\s([0-9]*[.]*[0-9]*[,][0-9]*)\s+Stück", rawText
         )
         divCurr, divperstock = dividendperstockAndCurr[0]
@@ -219,13 +248,15 @@ class ComDirectParser:
         brutto = stringToNumber(brutto)
 
         # source tax
-        sourcetax = re.findall(rf"(\d+(?:\.\d+)?,\d+) % Quellensteuer\s+{self.CUR}\s+{regexdecimal}", rawText)
+        sourcetax = re.findall(
+            rf"(\d+(?:\.\d+)?,\d+) % Quellensteuer\s+{self.CUR}\s+{regexdecimal}", rawText
+        )
         tax_percentage, tax_curr, tax = sourcetax[0]
-        
+
         tax_percentage = stringToNumber(tax_percentage)
         tax = stringToNumber(tax)
 
-        log.warning(tax)
+        # log.warning(tax)
         # if dividend currency is not equal to account currency
         if divCurr != accountCurr:
             forexrate = stringToNumber(
@@ -233,10 +264,10 @@ class ComDirectParser:
             )
         else:
             forexrate = 1.0
-        
+
         div = np.round(divperstock / forexrate, 2)
         brutto = np.round(brutto / forexrate, 2)
-        tax = np.round(tax / forexrate,2)
+        tax = np.round(tax / forexrate, 2)
         cost = np.round(brutto - totalCost, 2)
 
         _costKeys = ["Dividend (per share)", "Brutto", "Fees"]
@@ -443,3 +474,94 @@ class ComDirectParser:
         parsed["Tax Currency"] = tax_currency
 
         return {**parsed, **{"Tax Reference Number": refnr}}
+
+    def parse_finanzreport(self, rawText):
+        parsed = {}
+
+        # used regex
+        accountre = f"([A-Z]{{2}}[0-9]{{2}}(?:[ ]?[0-9]{{4}}){{4}}(?:[ ]?[0-9]{{1,2}}))"
+        valuere = f"([+-][0-9]*[.]*[0-9]*[,][0-9]*)"
+        datere = f"([0-9]+\.[0-9]+\.[0-9]+)\s+"
+        overviewre = fr"\s*([A-Za-z\-\s]*)\s+([A-Z]{{2}}[0-9]{{2}}(?:[ ]?[0-9]{{4}}){{4}}(?:[ ]?[0-9]{{1,2}})|\s*).*([+-][0-9]*[.]*[0-9]*[,][0-9]*)"
+
+        kontooverview = [
+            s
+            for s in re.findall("Kontoübersicht\n\n(.*)Gesamtsaldo", rawText, re.DOTALL)[0].split(
+                "\n"
+            )
+            if s
+        ]
+
+        date = re.findall(datere, rawText)[0].replace(".", "-")
+        currency = kontooverview[1]
+        kontooverview = kontooverview[2:]
+        kontoslist = re.findall(overviewre, "\n".join(kontooverview))
+        girodetail = re.findall("Girokonto[\S\s]*?Alter([\S\s]*?)(?=Neuer)", rawText)[0]
+        girotransactions = re.findall(
+            datere + datere + "([\S\s]+?)\n\W([\S\s]+?)\n\W" + valuere, girodetail
+        )
+
+        # ACCOUNTS SALDO OVERVIEW (END OF MONTH)
+        df = pd.DataFrame(kontoslist, columns=["name", "account", "saldo"])
+        df.loc[:, "saldo"] = df["saldo"].apply(stringToNumber)
+        df.loc[:, "date"] = date
+        df["date"] = pd.to_datetime(df["date"])
+
+        # GIRO KONTO TRANSACTIONS
+        dfgiro = pd.DataFrame(
+            girotransactions, columns=["date", "ValDate", "type", "details", "value"]
+        )
+        dfgiro.loc[:, "value"] = dfgiro["value"].apply(stringToNumber)
+        dfgiro.loc[:, "date"] = pd.to_datetime(dfgiro["date"], dayfirst=True)
+        dfgiro.loc[:, "ValDate"] = pd.to_datetime(dfgiro["ValDate"], dayfirst=True)
+
+        parsed["currency"] = currency
+        parsed["saldos"] = df
+        parsed["giroTransactions"] = dfgiro
+
+        return parsed
+
+    def save(self, db_name: str = "ComDirect"):
+
+        coldiv = self.client[db_name]["div"]
+        coltax = self.client[db_name]["tax"]
+        colbus = self.client[db_name]["buy_sell"]
+        colsaldos = self.client[db_name]["saldos"]
+        colgirotransactions = self.client[db_name]["giroTransactions"]
+
+        # colm.create_index(indexTupleList, unique=unique)
+        coldiv.create_index(
+            [("Date", ASCENDING), ("Tax Reference Number", ASCENDING), ("filename", ASCENDING)],
+            unique=True,
+        )
+        coltax.create_index(
+            [("Date", ASCENDING), ("Tax Reference Number", ASCENDING), ("filename", ASCENDING)],
+            unique=True,
+        )
+        colbus.create_index(
+            [("Date", ASCENDING), ("Tax Reference Number", ASCENDING), ("filename", ASCENDING)],
+            unique=True,
+        )
+        colsaldos.create_index(
+            [("date", ASCENDING), ("name", ASCENDING)],
+            unique=True,
+        )
+        colgirotransactions.create_index(
+            [("date", ASCENDING), ("type", ASCENDING)],
+            unique=True,
+        )
+
+        try:
+            if self.divparsed:
+                coldiv.insert_many(self.divparsed, ordered=False)
+            if self.taxparsed:
+                coltax.insert_many(self.taxparsed, ordered=False)
+            if self.buysellparsed:
+                colbus.insert_many(self.buysellparsed, ordered=False)
+            if self.saldos:
+                colsaldos.insert_many(self.saldos, ordered=False)
+            if self.girotransactions:
+                colgirotransactions.insert_many(self.girotransactions, ordered=False)
+
+        except BulkWriteError:
+            pass
