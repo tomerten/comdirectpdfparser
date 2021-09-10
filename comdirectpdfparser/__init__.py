@@ -11,6 +11,7 @@ __version__ = "0.0.0"
 
 import os
 import re
+from typing import Dict, List, Tuple
 
 import numpy as np
 import pandas as pd
@@ -65,6 +66,7 @@ class ComDirectParser:
         self.saldos = []
         self.girotransactions = []
         self.client = client
+
         # if inputlist is single file make a list out of it
         if isinstance(inputlist, list):
             pass
@@ -87,11 +89,12 @@ class ComDirectParser:
                 if not file.startswith("."):
                     self.filelist.append(os.path.join(folder, file))
 
-    def parse(self):
-        """
-        General parser that will go through all given
-        files (also in given folders) and try to parse them.
+    def parse(self) -> Tuple[List[Dict]]:
+        """General parser that will go through all give files (also in given folders)
+        and try to parse them.
 
+        Returns:
+            Tuple[List[Dict]]: parsed data
         """
         for _file in tqdm(self.filelist):
             # log.info(_file)
