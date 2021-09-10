@@ -10,37 +10,32 @@ A module with utilities for the ComDirect REGEX parser class.
 from tika import parser
 
 
-def readRaw(_file):
-    """
-    Read raw pdf data from file.
+def readRaw(_file: str) -> dict:
+    """Read raw pdf data from file.
 
-    Arguments :
-    -----------
-    str	: _file
-        PDF file to open.
+    Args:
+        _file (str): PDF file to open
 
-	Returns:
-	--------
-	dict
-		tika dict read from file
+    Returns:
+        dict: tika dict read from file
     """
 
     return parser.from_file(_file)
 
-def stringToNumber(s):
-    """
-    Rudimentary string to float conversion
-    if the string representation contains both 
-    comma and dot.
-    
-    Pythonic way would be using locale, but
-    leads to problems on mac, keep this
-    method for the time being.
 
-    Parameters:
-    -----------
-    s: str
-        string to convert to float
+def stringToNumber(s: str) -> float:
+    """Rudimentary string to float conversion if the string representation
+    contains both comma and dot.
+
+    Pythonic way would be using locale, but this leads to problems on mac,
+    keep this method for the time being.
+
+    Args:
+        s (str): string to convert to float
+
+    Returns:
+        float: float value of the input string
     """
-    s = float(s.replace('.','').replace(',','.'))
+
+    s = float(s.replace(".", "").replace(",", "."))
     return s
