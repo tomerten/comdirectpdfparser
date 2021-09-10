@@ -21,9 +21,8 @@
 import os
 import sys
 
-sys.path.insert(0, os.path.abspath('..'))
-    
-    
+sys.path.insert(0, os.path.abspath(".."))
+
 
 import comdirectpdfparser
 
@@ -35,25 +34,34 @@ import comdirectpdfparser
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['sphinx.ext.autodoc'
-             , 'sphinx.ext.viewcode'
-             , 'sphinx_click.ext'
-             ]
-
+extensions = [
+    "matplotlib.sphinxext.mathmpl",
+    "matplotlib.sphinxext.plot_directive",
+    "IPython.sphinxext.ipython_directive",
+    "IPython.sphinxext.ipython_console_highlighting",
+    "sphinx.ext.mathjax",
+    "sphinx.ext.autodoc",
+    "sphinx.ext.viewcode",
+    "sphinx_click.ext",
+    "sphinx.ext.doctest",
+    "sphinx.ext.inheritance_diagram",
+    "sphinx.ext.napoleon",
+    "nbsphinx",
+]
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ['_templates']
+templates_path = ["_templates"]
 
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
 #
 # source_suffix = ['.rst', '.md']
-source_suffix = '.rst'
+source_suffix = ".rst"
 
 # The master toctree document.
-master_doc = 'index'
+master_doc = "index"
 
 # General information about the project.
-project = u'comdirectpdfparser'
+project = u"comdirectpdfparser"
 copyright = u"2021, first-name last-name"
 author = u"first-name last-name"
 
@@ -76,10 +84,10 @@ language = None
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This patterns also effect to html_static_path and html_extra_path
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
+exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 # The name of the Pygments (syntax highlighting) style to use.
-pygments_style = 'sphinx'
+pygments_style = "sphinx"
 
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = False
@@ -92,10 +100,11 @@ todo_include_todos = False
 #
 try:
     import sphinx_rtd_theme
-    html_theme = 'sphinx_rtd_theme'    
+
+    html_theme = "sphinx_rtd_theme"
 except ImportError:
     print("Sphinx html theme 'sphinx_rtd_theme' not found. Using 'classic' instead.")
-    html_theme = 'classic'    
+    html_theme = "classic"
 
 
 # Theme options are theme-specific and customize the look and feel of a
@@ -107,13 +116,13 @@ except ImportError:
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
+html_static_path = ["_static"]
 
 
 # -- Options for HTMLHelp output ---------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'comdirectpdfparserdoc'
+htmlhelp_basename = "comdirectpdfparserdoc"
 
 
 # -- Options for LaTeX output ------------------------------------------
@@ -122,15 +131,12 @@ latex_elements = {
     # The paper size ('letterpaper' or 'a4paper').
     #
     # 'papersize': 'letterpaper',
-
     # The font size ('10pt', '11pt' or '12pt').
     #
     # 'pointsize': '10pt',
-
     # Additional stuff for the LaTeX preamble.
     #
     # 'preamble': '',
-
     # Latex figure (float) alignment
     #
     # 'figure_align': 'htbp',
@@ -140,20 +146,20 @@ latex_elements = {
 # (source start file, target name, title, author, documentclass
 # [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'comdirectpdfparser.tex',
-     u'comdirectpdfparser Documentation',
-     u'first-name last-name', 'manual'),
+    (
+        master_doc,
+        "comdirectpdfparser.tex",
+        u"comdirectpdfparser Documentation",
+        u"first-name last-name",
+        "manual",
+    ),
 ]
 
 # -- Options for manual page output ------------------------------------
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [
-    (master_doc, 'comdirectpdfparser',
-     u'comdirectpdfparser Documentation',
-     [author], 1)
-]
+man_pages = [(master_doc, "comdirectpdfparser", u"comdirectpdfparser Documentation", [author], 1)]
 
 
 # -- Options for Texinfo output ----------------------------------------
@@ -162,13 +168,13 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'comdirectpdfparser',
-     u'comdirectpdfparser Documentation',
-     author,
-     'comdirectpdfparser',
-     'One line description of project.',
-     'Miscellaneous'),
+    (
+        master_doc,
+        "comdirectpdfparser",
+        u"comdirectpdfparser Documentation",
+        author,
+        "comdirectpdfparser",
+        "One line description of project.",
+        "Miscellaneous",
+    ),
 ]
-
-
-

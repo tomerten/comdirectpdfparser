@@ -493,7 +493,7 @@ class ComDirectParser:
             if s
         ]
 
-        date = re.findall(datere, rawText)[0].replace(".", "-")
+        date = re.findall("per " + datere, rawText)[0].replace(".", "-")
         currency = kontooverview[1]
         kontooverview = kontooverview[2:]
         kontoslist = re.findall(overviewre, "\n".join(kontooverview))
@@ -506,7 +506,7 @@ class ComDirectParser:
         df = pd.DataFrame(kontoslist, columns=["name", "account", "saldo"])
         df.loc[:, "saldo"] = df["saldo"].apply(stringToNumber)
         df.loc[:, "date"] = date
-        df["date"] = pd.to_datetime(df["date"])
+        df["date"] = pd.to_datetime(df["date"], dayfirst=True)
 
         # GIRO KONTO TRANSACTIONS
         dfgiro = pd.DataFrame(

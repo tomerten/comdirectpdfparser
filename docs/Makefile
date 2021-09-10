@@ -32,6 +32,9 @@ deps:
 	@pip show sphinx-click     >/dev/null && echo "Already installed: sphinx-click"     || pip install sphinx-click
 	@pip show sphinx           >/dev/null && echo "Already installed: sphinx"           || pip install sphinx
 	@pip show sphinx-rtd-theme >/dev/null && echo "Already installed: sphinx-rtd-theme" || pip install sphinx-rtd-theme
+	@pip show nbsphinx         >/dev/null && echo "Already installed: nbsphinx"         || pip install nbsphinx
+	@pip show matplotlib       >/dev/null && echo "Already installed: matplotlib"       || pip install matplotlib
+	@pip show pandoc           >/dev/null && echo "Already installed: matplotlib"       || pip install pandoc
 
 # Catch-all target: route all unknown targets to Sphinx using the new
 # "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).

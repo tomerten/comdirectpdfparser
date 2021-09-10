@@ -3,3 +3,7 @@ sphinx-click>=2.3.0
 tomlkit>=0.5.5
 cookiecutter>=1.5.0
 semantic-version>=2.8.3
+nbsphinx>=0.8.4
+ipykernel
+matplotlib
+pandoc

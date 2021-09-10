@@ -9,6 +9,7 @@ Welcome to comdirectpdfparser's documentation!
    readme
    installation
    api
+   apps
    authors
    history
 
