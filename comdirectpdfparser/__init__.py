@@ -157,14 +157,16 @@ class ComDirectParser:
             self.girotransactions,
         )
 
-    def parse_account(self, rawText, _doctype):
-        """
-        Extract account and account currency data,
-        date of transaction and total amount.
+    def parse_account(self, rawText: str, _doctype: str) -> dict:
+        """Extract account and account currency data, date of transaction and total amount. Total amount
+        is stored with different key for kauf/verkauf of div as they have different meaning.
 
-        Total amount is stored with different key for
-        kauf/verkauf or div as they have a different
-        meaning.
+        Args:
+            rawText (str): raw pdf text
+            _doctype (str): document type [div, divertrags, buy, sell, finanzreport]
+
+        Returns:
+            dict: [description]
         """
         acc = {}
 
@@ -452,7 +454,15 @@ class ComDirectParser:
 
         return parsed
 
-    def parse_tax(self, rawText):
+    def parse_tax(self, rawText: str) -> dict:
+        """Tax parser
+
+        Args:
+            rawText (str): pdf raw text
+
+        Returns:
+            dict: data as dict
+        """
         parsed = {}
         # Get Tax Type
         taxtype = re.findall(f"\nSteuerliche Behandlung:\s+(.*)", rawText)[0]
@@ -479,7 +489,15 @@ class ComDirectParser:
 
         return {**parsed, **{"Tax Reference Number": refnr}}
 
-    def parse_finanzreport(self, rawText):
+    def parse_finanzreport(self, rawText: str) -> dict:
+        """Finanzreport parser
+
+        Args:
+            rawText (str): raw pdf text
+
+        Returns:
+            dict: keys - currency, saldos, giroTransactions
+        """
         parsed = {}
 
         # used regex
@@ -526,6 +544,11 @@ class ComDirectParser:
         return parsed
 
     def save(self, db_name: str = "ComDirect"):
+        """Save the data to mongodb
+
+        Args:
+            db_name (str, optional): name of the database to store the data. Defaults to "ComDirect".
+        """
 
         coldiv = self.client[db_name]["div"]
         coltax = self.client[db_name]["tax"]
@@ -567,5 +590,6 @@ class ComDirectParser:
             if self.girotransactions:
                 colgirotransactions.insert_many(self.girotransactions, ordered=False)
 
-        except BulkWriteError:
+        except BulkWriteError as e:
+            print(e)
             pass
