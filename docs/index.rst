@@ -8,6 +8,7 @@ Welcome to comdirectpdfparser's documentation!
 
    readme
    installation
+   tutorial 
    api
    apps
    authors
